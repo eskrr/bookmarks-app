@@ -186,9 +186,3 @@ app.patch('/bookmark/:id', jsonParser, (req, res) => {
 app.listen(8080, () => {
     console.log('This server is running on port 8080');
 });
-
-
-// Base URL : http://localhost:8080/
-// GET endpoint : http://localhost:8080/bookmarks
-// GET by id in query : http://localhost:8080/api/studentById?id=123
-// GET by id in param : http://localhost:8080/api/getStudentById/123
