@@ -1,7 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 const uuid = require('uuid');
+const { Bookmarks } = require('./models/bookmarkModel');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -13,40 +15,21 @@ const fields = ['title', 'description', 'url', 'rating'];
 app.use(morgan('dev'));
 app.use(validator);
 
-let listOfBookmarks = [
-    {
-        id: uuid.v4(),
-        title: 'Don Quijote de la Mancha',
-        description:  'Aenean velit felis, lobortis a libero suscipit, ullamcorper tempor lacus. Donec pharetra libero et ante sollicitudin, nec tincidunt ipsum auctor. In tempor mauris ut lorem sagittis faucibus.',
-        url: 'https://es.wikipedia.org/wiki/Don_Quijote_de_la_Mancha',
-        rating: 5
-    },
-    {
-        id: uuid.v4(),
-        title: 'La Ilíada',
-        description: 'Proin posuere iaculis sapien, a maximus odio semper vitae. Vestibulum condimentum urna ac dignissim fermentum.',
-        url: 'https://es.wikipedia.org/wiki/Il%C3%ADada',
-        rating: 4
-    },
-    {
-        id: uuid.v4(),
-        title: 'Hamlet',
-        description: 'Praesent ut risus vitae augue egestas viverra. Duis volutpat rhoncus nunc nec ullamcorper. In ullamcorper tristique fringilla. Cras eget nisl vel metus dignissim pellentesque.',
-        url: 'https://es.wikipedia.org/wiki/Hamlet',
-        rating: 3
-    },
-];
-
-
 // GET endpoint : http://localhost:8080/bookmarks
-
 app.get('/bookmarks', (req, res) => {
     console.log('Getting all bookmarks.');
-    return res.status(200).json(listOfBookmarks);
+    Bookmarks
+        .getAllBookmarks()
+        .then(result => {
+            return res.status(200).json(result);
+        })
+        .catch(err => {
+            res.statusMessage = 'Something is wrong with the Database. Try again later.';
+            return res.status( 500 ).end();
+        })
 });
 
 // GET by title in query : http://localhost:8080/bookmark?title=123
-
 app.get('/bookmark', (req, res) => {
     console.log('Getting bookmark by title.');
     console.log(req.query);
@@ -60,23 +43,23 @@ app.get('/bookmark', (req, res) => {
         return res.status(406).end()
     }
 
-    let results = listOfBookmarks.filter(student => {
-        if (student.title === title)
-            return student;
-    });
-
-    if (results.length === 0) {
-        errMsg = 'Given title does not match any bookmark in our records';
-        console.log(errMsg);
-        res.statusMessage = errMsg;
-        return res.status(404).end();
-    }
-
-    return res.status(200).json(results);
+    Bookmarks
+        .findBookmarks(title)
+        .then(result => {
+           if (result.length === 0) {
+                errMsg = 'Given title does not match any bookmark in our records';
+                console.log(errMsg);
+                res.statusMessage = errMsg;
+                return res.status(404).end();
+            }
+            return res.status(200).json(result);
+        })
+        .catch(err => {
+            res.statusMessage = 'Something is wrong with the Database. Try again later.';
+        });
 });
 
 // POST : http://localhost:8080/bookmarks
-
 app.post('/bookmarks', jsonParser, (req, res) => {
     console.log('Creating bookmark ...');
     console.log(req.body);
@@ -106,34 +89,39 @@ app.post('/bookmarks', jsonParser, (req, res) => {
     }
 
     bookmark.id = uuid.v4();
-    console.log('Bookmark creation successful');
-    listOfBookmarks.push(bookmark);
-    return res.status(201).json(bookmark);
+
+    Bookmarks
+        .createBookmark(bookmark)
+        .then(result => {
+            console.log('Bookmark creation successful');
+            return res.status(201).json(result);
+        })
+        .catch(err => {
+            res.statusMessage = 'Something is wrong with the Database. Try again later.';
+            return res.status(500).end();
+        })
 });
 
 // DELETE : http://localhost:8080/bookmarks/:id
-
 app.delete('/bookmark/:id', (req, res) => {
     console.log('Deleting bookmark ...');
     console.log(req.params);
 
     let id = req.params.id;
-    let bookmark_index = listOfBookmarks.findIndex(bookmark => bookmark.id === id);
 
-    if (bookmark_index < 0) {
-        errMsg = 'Bookmark was not found.';
-        console.log(errMsg);
-        res.statusMessage = errMsg;
-        return res.status(404).end();
-    }
-
-    console.log('Deletion successful');
-    listOfBookmarks.splice(bookmark_index, 1 );
-    return res.status(200).end();
+    Bookmarks
+        .deleteBookmark(id)
+        .then(result => {
+            console.log('Bookmark deletion successful');
+            return res.status(200).json(result);
+        })
+        .catch(err => {
+            res.statusMessage = 'Something is wrong with the Database. Try again later.';
+            return res.status(500).end();
+        })
 });
 
 // PATCH : http://localhost:8080/bookmarks/:id
-
 app.patch('/bookmark/:id', jsonParser, (req, res) => {
     console.log('Updating bookmark ...');
     console.log(req.params)
@@ -156,33 +144,52 @@ app.patch('/bookmark/:id', jsonParser, (req, res) => {
         return res.status(409).end();
     }
 
-    let bookmark_index = listOfBookmarks.findIndex(bookmark => bookmark.id === id);
-
-    if (bookmark_index < 0) {
-        errMsg = 'Bookmark was not found.';
-        console.log(errMsg);
-        res.statusMessage = errMsg;
-        return res.status(404).end();
-    }
-
+    let params = {};
     fields.forEach(field => {
-        if (req.body[field]) {
-            if (field == 'rating' && typeof(req.body[field]) !== 'number') {
-                errMsg = 'The rating MUST be a number.';
-                console.log(errMsg);
-                res.statusMessage = errMsg;
-                return res.status(409).end();
-            }
-            listOfBookmarks[bookmark_index][field] = req.body[field];
-        }
+        if (req.body[field])
+            params[field] = req.body[field];
     });
 
-    console.log('Update successful');
-    return res.status(202).json(listOfBookmarks[bookmark_index]);
+    if (typeof(params.rating) !== 'number') {
+        errMsg = 'The rating MUST be a number.';
+        console.log(errMsg);
+        res.statusMessage = errMsg;
+        return res.status(409).end();
+    }
+
+    Bookmarks
+        .updateBookmark(id, params)
+        .then(result => {
+            console.log('Bookmark update successful');
+            return res.status(202).json(result);
+        })
+        .catch(err => {
+            res.statusMessage = 'Something is wrong with the Database. Try again later.';
+            return res.status(500).end();
+        })
 });
 
 // Base URL : http://localhost:8080/
-
 app.listen(8080, () => {
     console.log('This server is running on port 8080');
+
+    new Promise((resolve, reject) => {
+        const settings = {
+            useNewUrlParser: true, 
+            useUnifiedTopology: true, 
+            useCreateIndex: true
+        };
+        mongoose.connect('mongodb://localhost/bookmarksdb', settings, (err) => {
+            if(err){
+                return reject(err);
+            }
+            else{
+                console.log('Database connected successfully.');
+                return resolve();
+            }
+        })
+    })
+    .catch(err => {
+        console.log(err);
+    });
 });
