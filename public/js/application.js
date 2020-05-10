@@ -94,11 +94,10 @@ function updateBookmark(bookmark) {
       });
 
       // EDIT EVENTS
-      editForm = document.getElementById(`editBookmark-${bookmark.id}`);
-      editForm.classList.add('d-none');
+      document.getElementById(`editBookmark-${bookmark.id}`).classList.add('d-none');
       editButton = document.getElementById(`editBookmarkButton-${bookmark.id}`);
       editButton.addEventListener('click', function(event) {
-        editForm.classList.remove('d-none');
+        document.getElementById(`editBookmark-${bookmark.id}`).classList.remove('d-none');
         document.getElementById(bookmark.id).classList.add('d-none');
       });
 
@@ -249,8 +248,6 @@ function appendBookmark(bookmark, containerId) {
   // EDIT EVENTS
   editButton = document.getElementById(`editBookmarkButton-${bookmark.id}`);
   editButton.addEventListener('click', function(event) {
-    console.log(event);
-    console.log(bookmark.id);
     document.getElementById(`editBookmark-${bookmark.id}`).classList.remove('d-none');
     document.getElementById(bookmark.id).classList.add('d-none');
   });
