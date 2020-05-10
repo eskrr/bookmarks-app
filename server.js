@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const uuid = require('uuid');
 const { Bookmarks } = require('./models/bookmarkModel');
+const {DATABASE_URL, PORT} = require( './config' );
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -174,7 +175,7 @@ app.patch('/bookmark/:id', jsonParser, (req, res) => {
 });
 
 // Base URL : http://localhost:8080/
-app.listen(8080, () => {
+app.listen(PORT, () => {
     console.log('This server is running on port 8080');
 
     new Promise((resolve, reject) => {
@@ -183,7 +184,7 @@ app.listen(8080, () => {
             useUnifiedTopology: true, 
             useCreateIndex: true
         };
-        mongoose.connect('mongodb://localhost/bookmarksdb', settings, (err) => {
+        mongoose.connect(DATABASE_URL, settings, (err) => {
             if(err){
                 return reject(err);
             }
