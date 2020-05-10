@@ -9,11 +9,14 @@ const app = express();
 const jsonParser = bodyParser.json();
 
 var validator = require('./middleware/validateToken.js');
+var cors = require('./middleware/cors.js');
 
 const fields = ['title', 'description', 'url', 'rating']; 
 
+app.use(express.static('public'));
 app.use(morgan('dev'));
 app.use(validator);
+app.use(cors);
 
 // GET endpoint : http://localhost:8080/bookmarks
 app.get('/bookmarks', (req, res) => {
@@ -80,8 +83,8 @@ app.post('/bookmarks', jsonParser, (req, res) => {
         res.statusMessage = errMsg;
         return res.status(406).end();
     }
-
-    if (typeof(bookmark.rating) !== 'number') {
+    bookmark.rating = parseInt(bookmark.rating);
+    if (typeof(bookmark.rating) !== 'number' || isNaN(bookmark.rating)) {
         errMsg = 'The rating MUST be a number.';
         console.log(errMsg);
         res.statusMessage = errMsg;
@@ -150,7 +153,8 @@ app.patch('/bookmark/:id', jsonParser, (req, res) => {
             params[field] = req.body[field];
     });
 
-    if (typeof(params.rating) !== 'number') {
+    params.rating = parseInt(params.rating);
+    if (typeof(params.rating) !== 'number' || isNaN(params.rating)) {
         errMsg = 'The rating MUST be a number.';
         console.log(errMsg);
         res.statusMessage = errMsg;

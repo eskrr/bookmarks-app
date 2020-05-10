@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Bookmarks App</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="./js/application.js"></script>
+        <script src="https://unpkg.com/feather-icons"></script>
+    </head>
+    <header class="mt-4">
+        <div class="alert alert-danger d-none m-2" role="alert" id="errorAlert">
+        </div>
+        <div class="alert alert-success d-none m-2" role="alert" id="successAlert">
+        </div>
+        <h1 class="text-center">BOOKMARKS APP</h1>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="index-tab" data-toggle="tab" href="#index" role="tab" aria-controls="index" aria-selected="true">Lista de bookmarks</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="create-bookmark-tab" data-toggle="tab" href="#create-bookmark" role="tab" aria-controls="create-bookmark" aria-selected="false">Crear Bookmark</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="search-tab" data-toggle="tab" href="#search" role="tab" aria-controls="search" aria-selected="false">Buscar por Título</a>
+            </li>
+        </ul>
+    </header>
+    <body>   
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="index" role="tabpanel" aria-labelledby="index-tab">
+                <div id="bookmarksIndex" class="p-2 m-4">
+                </div>
+            </div>
+            <div class="tab-pane fade" id="create-bookmark" role="tabpanel" aria-labelledby="create-bookmark-tab">
+                <form class="p-2 m-4" id="createBookmark">
+                    <div class="form-group">
+                        <label for="title">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Introduzca el título del libro">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Descripción</label>
+                        <textarea id="description" name="description" class="form-control" rows="5" ></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="url">URL</label>
+                        <input id="url" name="url" type="url" class="form-control" placeholder="https://www.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="rating">Rating</label>
+                        <input type="number" class="form-control" id="rating" name="rating" min="1" max="5">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submit" name="submit">Crear bookmark</button>
+                </form>
+            </div>
+            <div class="tab-pane fade" id="search" role="tabpanel" aria-labelledby="search-tab">
+                <form class="p-2 m-4" id="searchBookmark">
+                    <div class="form-group d-inline-block w-50">
+                        <label for="searchTitle">Buscar por titulo</label>
+                        <input type="text" class="form-control" id="searchTitle" name="searchTitle" placeholder="Introduzca el título del libro">
+                    </div>
+                    <button type="submit" class="btn btn-primary d-inline-block" id="submit" name="submit">Buscar</button>
+                </form>
+                <div id="searchResults" class="p-2 m-4">
+                </div>
+            </div>
+        </div>
+        <section class="results">
+
+        </section>
+    </body>
+</html>
